@@ -1,0 +1,15 @@
+Change log for SimplexNoise
+---------------------------
+
+1.1.0
+ADD: Constructor can take a previous or manually generated seed-array
+ADD: New method to re-seed randomly or using a previous generated array
+ADD: New method to obtain current seed array.
+
+1.0.0
+Re-release as RC
+
+<1.0.0
+ADD: original perm12 optimization
+
+(c) Epistemex 2014-2016, 2018, 2024

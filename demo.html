@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>SimplexNoise test/demo</title>
+	<style>
+		body {background:#111; color:#ccc;padding:10px 20px;font:14px sans-serif}
+    a {display:block;margin:7px 0 16px 0;width:140px}
+    #canvas {background:#000;border:1px solid #000}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="800" height="500"></canvas>
+	<br>
+
+	<label for="rngScale">Scale:</label>
+	<input type="range" value="3" min="1" max="20" step="0.1" style="width:200px" id="rngScale">
+
+	<label for="chkClip">Clip to metablobs</label>
+	<input type="checkbox" id="chkClip">
+
+	<button id="btnAnim">Animate Z</button>
+	<button id="btnSeed">New seed</button>
+
+<script src="simplexnoise.js"></script>
+<script>
+
+	let canvas = document.getElementById('canvas'),
+    ctx = canvas.getContext('2d'),
+    w = canvas.width,
+    h = canvas.height,
+    scale = 3,
+    anim = false,
+    maxZ = 50,
+    clip = false,
+    cnt = 0,
+    sx = new SimplexNoise(),
+    idata,
+    buffer;
+
+  // get buffer once
+  ctx.fillStyle = '#27f';
+  ctx.fillRect(0, 0, w, h);
+  idata = ctx.getImageData(0, 0, w, h);
+  buffer = new Uint32Array(idata.data.buffer);
+
+  // update canvas
+  render(0);
+
+  rngScale.onchange = rngScale.oninput = function() {
+    scale = +this.value;
+    if ( !anim ) render(0);
+  };
+
+  chkClip.onchange = function() {
+    clip = !!this.checked;
+    if ( !anim ) render(0);
+  };
+
+  btnAnim.onclick = function() {
+    if ( anim ) {
+      anim = false;
+    }
+    else {
+      cnt = 0;
+      anim = true;
+      animate();
+    }
+  };
+
+  btnSeed.onclick = function() {
+    sx.seed();
+    render(cnt / maxZ);
+  };
+
+  function animate() {
+    render(cnt++ / maxZ);
+    if ( anim ) requestAnimationFrame(animate);
+  }
+
+  function render(z) {
+    let x, y = 0, v, wf = 1 / w, hf = 1 / h;
+
+    for(; y < h; y++) {
+      for(x = 0; x < w; x++) {
+        v = (sx.noise3D(x * wf * scale, y * hf * scale, z) * 255) | 0;
+        buffer[ w * y + x ] = (clip ? (v < 167 ? 0 : v) : v) << 24 | 0xffffff;
+      }
+    }
+
+    ctx.putImageData(idata, 0, 0);
+  }
+
+</script>
+</body>
+</html>
